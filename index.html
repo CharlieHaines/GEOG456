@@ -3,9 +3,1396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Git</title>
+    <title>GEOG456 - Interactive Learning Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #3730A3;
+            --accent-purple: #8B5CF6;
+            --accent-pink: #EC4899;
+            --accent-teal: #14B8A6;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --bg-white: #FFFFFF;
+            --bg-light: #F9FAFB;
+            --bg-gradient-start: #EEF2FF;
+            --bg-gradient-end: #FAF5FF;
+            --border-light: #E5E7EB;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Password Screen */
+        #passwordScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        #passwordScreen.hidden {
+            display: none;
+        }
+
+        .password-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .password-container h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .password-container p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-input.error {
+            border-color: #EF4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .password-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .password-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(102, 126, 234, 0.5);
+        }
+
+        .error-message {
+            color: #EF4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple));
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            padding: 5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 15s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+
+        .hero-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 700px;
+        }
+
+        /* High Scores Section */
+        .high-scores-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .score-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .score-card h4 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Game Cards */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple), var(--accent-pink));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .game-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-light);
+        }
+
+        .game-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-card h3 {
+            font-size: 1.375rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .game-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .game-card .high-score {
+            font-size: 0.875rem;
+            color: var(--primary-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .play-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .play-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-light);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-close:hover {
+            background: var(--border-light);
+            transform: rotate(90deg);
+        }
+
+        .modal h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal .current-score {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Game Elements */
+        #gameCanvas {
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            border: 3px solid var(--border-light);
+            border-radius: 16px;
+            margin: 1.5rem auto;
+            display: block;
+            background: var(--bg-light);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .game-controls {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .game-instructions {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        /* Quiz Styles */
+        #quizQuestion, #capitalsQuestion {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .quiz-option {
+            width: 100%;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary-blue);
+            background: white;
+            transform: translateX(4px);
+        }
+
+        .quiz-option.correct {
+            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+            border-color: #10B981;
+            color: #065F46;
+        }
+
+        .quiz-option.incorrect {
+            background: linear-gradient(135deg, #FEE2E2, #FECACA);
+            border-color: #EF4444;
+            color: #991B1B;
+        }
+
+        /* Map Game */
+        .map-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .map-svg {
+            width: 100%;
+            height: auto;
+            cursor: pointer;
+        }
+
+        .country-path {
+            fill: #E5E7EB;
+            stroke: white;
+            stroke-width: 1;
+            transition: all 0.3s ease;
+        }
+
+        .country-path:hover {
+            fill: var(--primary-light);
+        }
+
+        .country-path.correct {
+            fill: #10B981;
+            animation: pulse 0.5s;
+        }
+
+        .country-path.incorrect {
+            fill: #EF4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .map-question {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 4rem 2rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .scores-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 1rem; }
+    </style>
 </head>
 <body>
-    <h1>Hello Test Git</h1>
+    <!-- Password Screen -->
+    <div id="passwordScreen">
+        <div class="password-container">
+            <h2>🔒 Access Required</h2>
+            <p>Enter the password to access GEOG456</p>
+            <input type="password" id="passwordInput" class="password-input" placeholder="Enter password" autocomplete="off">
+            <button onclick="checkPassword()" class="password-btn">Enter</button>
+            <div id="errorMessage" class="error-message">Incorrect password. Please try again.</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" style="display: none;">
+        <!-- Navigation -->
+        <nav>
+            <div class="nav-container">
+                <a href="#" class="logo">GEOG456</a>
+                <ul class="nav-links">
+                    <li><a href="#games">Games</a></li>
+                    <li><a href="#scores">High Scores</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Welcome to GEOG456</h1>
+                <p>This is my intro website, built by AI, just for fun, not submitted.</p>
+                <div class="cta-buttons">
+                    <a href="#games" class="btn btn-primary">Start Playing</a>
+                    <a href="#scores" class="btn btn-secondary">View High Scores</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Container -->
+        <div class="container">
+            <!-- High Scores Section -->
+            <section id="scores" class="high-scores-section">
+                <h2 class="section-title">🏆 High Scores</h2>
+                <p class="section-subtitle">Your best performances across all games</p>
+                <div class="scores-grid" id="highScoresGrid">
+                    <!-- High scores will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Games Section -->
+            <section id="games">
+                <h2 class="section-title">Interactive Games</h2>
+                <p class="section-subtitle">Choose a game to test your geography knowledge and skills</p>
+                
+                <div class="games-grid" id="gamesGrid">
+                    <!-- Game cards will be populated by JavaScript -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Geography Quiz Modal -->
+    <div class="modal" id="quizModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeGame('quiz')">✕</button>
+            <h3>Geography Quiz</h3>
+            <div class="current-score">Current Score: <span id="quizCurrentScore">0</span> | High Score: <span id="quizHighScore">0</span></div>
+            <div id="quizContent">
+                <p id="quizQuestion"></p>
+                <div id="quizOptions"></div>
+            </div>
+            <div class="game-controls">
+                <button class="btn btn-primary" onclick="resetQuiz()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capital Cities Quiz Modal -->
+    <div class="modal" id="capitalsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeGame('capitals')">✕</button>
+            <h3>Capital Cities Challenge</h3>
+            <div class="current-score">Current Score: <span id="capitalsCurrentScore">0</span> | High Score: <span id="capitalsHighScore">0</span></div>
+            <div id="capitalsContent">
+                <p id="capitalsQuestion"></p>
+                <div id="capitalsOptions"></div>
+            </div>
+            <div class="game-controls">
+                <button class="btn btn-primary" onclick="resetCapitals()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Challenge Modal -->
+    <div class="modal" id="mapModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeGame('map')">✕</button>
+            <h3>Find the Country</h3>
+            <div class="current-score">Current Score: <span id="mapCurrentScore">0</span> | High Score: <span id="mapHighScore">0</span></div>
+            <div class="map-question" id="mapQuestion">Click on: <span id="targetCountry"></span></div>
+            <div class="map-container" id="mapContainer">
+                <svg class="map-svg" id="worldMap" viewBox="0 0 1000 500">
+                    <!-- Simplified world map paths -->
+                    <!-- Europe -->
+                    <path class="country-path" data-country="France" d="M 480 200 L 500 190 L 510 200 L 505 220 L 490 225 L 475 210 Z"/>
+                    <path class="country-path" data-country="Spain" d="M 460 230 L 480 220 L 490 230 L 485 250 L 465 255 L 455 240 Z"/>
+                    <path class="country-path" data-country="Italy" d="M 510 210 L 525 200 L 530 230 L 520 250 L 510 240 Z"/>
+                    <path class="country-path" data-country="Germany" d="M 500 180 L 520 170 L 530 185 L 520 200 L 505 195 Z"/>
+                    <path class="country-path" data-country="United Kingdom" d="M 470 170 L 485 160 L 495 175 L 485 185 L 472 180 Z"/>
+                    
+                    <!-- Americas -->
+                    <path class="country-path" data-country="United States" d="M 150 180 L 250 170 L 260 200 L 240 230 L 160 225 L 140 200 Z"/>
+                    <path class="country-path" data-country="Canada" d="M 140 100 L 280 90 L 290 140 L 270 165 L 150 170 L 130 130 Z"/>
+                    <path class="country-path" data-country="Mexico" d="M 170 240 L 220 235 L 230 260 L 200 270 L 175 260 Z"/>
+                    <path class="country-path" data-country="Brazil" d="M 320 300 L 380 290 L 400 340 L 380 380 L 330 370 L 310 330 Z"/>
+                    
+                    <!-- Asia -->
+                    <path class="country-path" data-country="China" d="M 720 180 L 800 170 L 820 210 L 800 240 L 730 235 L 710 200 Z"/>
+                    <path class="country-path" data-country="India" d="M 680 250 L 730 245 L 750 290 L 720 310 L 690 300 Z"/>
+                    <path class="country-path" data-country="Japan" d="M 850 200 L 870 190 L 880 220 L 870 240 L 855 235 Z"/>
+                    <path class="country-path" data-country="Russia" d="M 550 80 L 850 70 L 870 130 L 840 160 L 560 155 L 540 110 Z"/>
+                    
+                    <!-- Africa -->
+                    <path class="country-path" data-country="Egypt" d="M 530 250 L 560 245 L 565 270 L 555 285 L 535 280 Z"/>
+                    <path class="country-path" data-country="South Africa" d="M 540 380 L 580 375 L 590 410 L 570 425 L 545 415 Z"/>
+                    <path class="country-path" data-country="Nigeria" d="M 495 290 L 520 287 L 525 305 L 510 315 L 495 308 Z"/>
+                    
+                    <!-- Oceania -->
+                    <path class="country-path" data-country="Australia" d="M 800 360 L 900 355 L 920 400 L 900 430 L 810 425 L 790 390 Z"/>
+                </svg>
+            </div>
+            <div class="game-instructions">
+                Click on the highlighted country on the map. You have 10 questions to answer!
+            </div>
+            <div class="game-controls">
+                <button class="btn btn-primary" onclick="resetMap()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snake Game Modal -->
+    <div class="modal" id="snakeModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeGame('snake')">✕</button>
+            <h3>Geography Snake</h3>
+            <div class="current-score">Current Score: <span id="snakeCurrentScore">0</span> | High Score: <span id="snakeHighScore">0</span></div>
+            <canvas id="gameCanvas" width="500" height="500"></canvas>
+            <div class="game-instructions">
+                <strong>How to play:</strong> Use arrow keys to navigate. Collect the geography icons to grow and earn points!
+            </div>
+            <div class="game-controls">
+                <button class="btn btn-primary" onclick="resetSnake()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password Protection
+        const correctPassword = "crocks";
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const error = document.getElementById('errorMessage');
+            
+            if (input.value === correctPassword) {
+                document.getElementById('passwordScreen').classList.add('hidden');
+                document.getElementById('mainContent').style.display = 'block';
+                initializeApp();
+            } else {
+                input.classList.add('error');
+                error.classList.add('show');
+                setTimeout(() => {
+                    input.classList.remove('error');
+                    error.classList.remove('show');
+                }, 2000);
+                input.value = '';
+            }
+        }
+
+        // Allow Enter key to submit password
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // High Scores Management
+        const HIGH_SCORES_KEY = 'geog456_highscores';
+        
+        let highScores = {
+            quiz: 0,
+            capitals: 0,
+            map: 0,
+            snake: 0
+        };
+
+        function loadHighScores() {
+            const saved = localStorage.getItem(HIGH_SCORES_KEY);
+            if (saved) {
+                highScores = JSON.parse(saved);
+            }
+        }
+
+        function saveHighScore(game, score) {
+            if (score > highScores[game]) {
+                highScores[game] = score;
+                localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(highScores));
+                updateHighScoresDisplay();
+                return true;
+            }
+            return false;
+        }
+
+        function updateHighScoresDisplay() {
+            const grid = document.getElementById('highScoresGrid');
+            grid.innerHTML = `
+                <div class="score-card">
+                    <h4>Geography Quiz</h4>
+                    <div class="score-value">${highScores.quiz}</div>
+                </div>
+                <div class="score-card">
+                    <h4>Capital Cities</h4>
+                    <div class="score-value">${highScores.capitals}</div>
+                </div>
+                <div class="score-card">
+                    <h4>Find the Country</h4>
+                    <div class="score-value">${highScores.map}</div>
+                </div>
+                <div class="score-card">
+                    <h4>Geography Snake</h4>
+                    <div class="score-value">${highScores.snake}</div>
+                </div>
+            `;
+        }
+
+        // Game Cards Data
+        const games = [
+            {
+                id: 'quiz',
+                icon: '🌍',
+                title: 'Geography Quiz',
+                description: 'Test your knowledge with challenging geography questions covering continents, oceans, and landmarks.',
+                modal: 'quizModal'
+            },
+            {
+                id: 'capitals',
+                icon: '🏛️',
+                title: 'Capital Cities Challenge',
+                description: 'Match countries with their capital cities. How many can you get right?',
+                modal: 'capitalsModal'
+            },
+            {
+                id: 'map',
+                icon: '🗺️',
+                title: 'Find the Country',
+                description: 'Click on countries on the world map. Perfect your geographic location skills!',
+                modal: 'mapModal'
+            },
+            {
+                id: 'snake',
+                icon: '🐍',
+                title: 'Geography Snake',
+                description: 'Classic snake game with a geographic twist. Collect map icons and grow!',
+                modal: 'snakeModal'
+            }
+        ];
+
+        function initializeApp() {
+            loadHighScores();
+            updateHighScoresDisplay();
+            renderGameCards();
+        }
+
+        function renderGameCards() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = games.map(game => `
+                <div class="game-card">
+                    <div class="game-icon">${game.icon}</div>
+                    <h3>${game.title}</h3>
+                    <p>${game.description}</p>
+                    <div class="high-score">High Score: ${highScores[game.id]}</div>
+                    <button class="play-button" onclick="openGame('${game.id}')">Play Now</button>
+                </div>
+            `).join('');
+        }
+
+        function openGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (game) {
+                document.getElementById(game.modal).classList.add('active');
+                document.getElementById(`${gameId}HighScore`).textContent = highScores[gameId];
+                
+                if (gameId === 'quiz') initQuiz();
+                if (gameId === 'capitals') initCapitals();
+                if (gameId === 'map') initMap();
+                if (gameId === 'snake') initSnake();
+            }
+        }
+
+        function closeGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (game) {
+                document.getElementById(game.modal).classList.remove('active');
+                if (gameId === 'snake') stopSnake();
+            }
+        }
+
+        // GEOGRAPHY QUIZ
+        const quizQuestions = [
+            { q: "Which is the largest ocean on Earth?", options: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"], correct: 2 },
+            { q: "What is the capital of Australia?", options: ["Sydney", "Melbourne", "Canberra", "Brisbane"], correct: 2 },
+            { q: "Which continent has the most countries?", options: ["Asia", "Africa", "Europe", "South America"], correct: 1 },
+            { q: "What is the longest river in the world?", options: ["Amazon", "Nile", "Yangtze", "Mississippi"], correct: 1 },
+            { q: "Which desert is the largest in the world?", options: ["Sahara", "Arabian", "Gobi", "Antarctic"], correct: 3 },
+            { q: "Mount Everest is located in which mountain range?", options: ["Alps", "Andes", "Rockies", "Himalayas"], correct: 3 },
+            { q: "Which country has the most time zones?", options: ["Russia", "USA", "France", "China"], correct: 2 },
+            { q: "What is the smallest country in the world?", options: ["Monaco", "Vatican City", "San Marino", "Liechtenstein"], correct: 1 },
+            { q: "Which African country was never colonized?", options: ["Kenya", "Ethiopia", "Ghana", "Nigeria"], correct: 1 },
+            { q: "The Great Barrier Reef is located off the coast of which country?", options: ["Indonesia", "Philippines", "Australia", "New Zealand"], correct: 2 }
+        ];
+
+        let quiz = { current: 0, score: 0, questions: [] };
+
+        function initQuiz() {
+            quiz.current = 0;
+            quiz.score = 0;
+            quiz.questions = [...quizQuestions].sort(() => Math.random() - 0.5);
+            document.getElementById('quizCurrentScore').textContent = '0';
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            if (quiz.current >= quiz.questions.length) {
+                endQuiz();
+                return;
+            }
+
+            const q = quiz.questions[quiz.current];
+            document.getElementById('quizQuestion').textContent = `Question ${quiz.current + 1} of ${quiz.questions.length}: ${q.q}`;
+            
+            const optionsHTML = q.options.map((opt, idx) => 
+                `<button class="quiz-option" onclick="checkQuizAnswer(${idx})">${opt}</button>`
+            ).join('');
+            
+            document.getElementById('quizOptions').innerHTML = optionsHTML;
+        }
+
+        function checkQuizAnswer(selected) {
+            const q = quiz.questions[quiz.current];
+            const buttons = document.querySelectorAll('#quizOptions .quiz-option');
+            
+            if (selected === q.correct) {
+                quiz.score++;
+                buttons[selected].classList.add('correct');
+                document.getElementById('quizCurrentScore').textContent = quiz.score;
+            } else {
+                buttons[selected].classList.add('incorrect');
+                buttons[q.correct].classList.add('correct');
+            }
+            
+            setTimeout(() => {
+                quiz.current++;
+                showQuizQuestion();
+            }, 1500);
+        }
+
+        function endQuiz() {
+            const isHighScore = saveHighScore('quiz', quiz.score);
+            const message = isHighScore ? '🎉 New High Score!' : 'Good job!';
+            document.getElementById('quizContent').innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h2 style="font-size: 2rem; margin-bottom: 1rem;">${message}</h2>
+                    <p style="font-size: 1.5rem; margin-bottom: 2rem;">Final Score: ${quiz.score} / ${quiz.questions.length}</p>
+                </div>
+            `;
+            renderGameCards();
+        }
+
+        function resetQuiz() {
+            initQuiz();
+        }
+
+        // CAPITALS QUIZ
+        const capitalsData = [
+            { country: "France", capital: "Paris", options: ["London", "Paris", "Berlin", "Rome"] },
+            { country: "Japan", capital: "Tokyo", options: ["Seoul", "Beijing", "Tokyo", "Bangkok"] },
+            { country: "Brazil", capital: "Brasília", options: ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"] },
+            { country: "Egypt", capital: "Cairo", options: ["Alexandria", "Cairo", "Luxor", "Aswan"] },
+            { country: "Canada", capital: "Ottawa", options: ["Toronto", "Vancouver", "Montreal", "Ottawa"] },
+            { country: "India", capital: "New Delhi", options: ["Mumbai", "Bangalore", "New Delhi", "Kolkata"] },
+            { country: "South Korea", capital: "Seoul", options: ["Busan", "Seoul", "Incheon", "Daegu"] },
+            { country: "Argentina", capital: "Buenos Aires", options: ["Córdoba", "Rosario", "Buenos Aires", "Mendoza"] },
+            { country: "Thailand", capital: "Bangkok", options: ["Phuket", "Chiang Mai", "Bangkok", "Pattaya"] },
+            { country: "Turkey", capital: "Ankara", options: ["Istanbul", "Ankara", "Izmir", "Antalya"] }
+        ];
+
+        let capitals = { current: 0, score: 0, questions: [] };
+
+        function initCapitals() {
+            capitals.current = 0;
+            capitals.score = 0;
+            capitals.questions = [...capitalsData].sort(() => Math.random() - 0.5);
+            document.getElementById('capitalsCurrentScore').textContent = '0';
+            showCapitalsQuestion();
+        }
+
+        function showCapitalsQuestion() {
+            if (capitals.current >= capitals.questions.length) {
+                endCapitals();
+                return;
+            }
+
+            const q = capitals.questions[capitals.current];
+            document.getElementById('capitalsQuestion').textContent = `Question ${capitals.current + 1} of ${capitals.questions.length}: What is the capital of ${q.country}?`;
+            
+            const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+            const optionsHTML = shuffled.map((opt) => 
+                `<button class="quiz-option" onclick="checkCapitalsAnswer('${opt}', '${q.capital}')">${opt}</button>`
+            ).join('');
+            
+            document.getElementById('capitalsOptions').innerHTML = optionsHTML;
+        }
+
+        function checkCapitalsAnswer(selected, correct) {
+            const buttons = document.querySelectorAll('#capitalsOptions .quiz-option');
+            
+            buttons.forEach(btn => {
+                if (btn.textContent === selected) {
+                    if (selected === correct) {
+                        btn.classList.add('correct');
+                        capitals.score++;
+                        document.getElementById('capitalsCurrentScore').textContent = capitals.score;
+                    } else {
+                        btn.classList.add('incorrect');
+                    }
+                }
+                if (btn.textContent === correct) {
+                    btn.classList.add('correct');
+                }
+            });
+            
+            setTimeout(() => {
+                capitals.current++;
+                showCapitalsQuestion();
+            }, 1500);
+        }
+
+        function endCapitals() {
+            const isHighScore = saveHighScore('capitals', capitals.score);
+            const message = isHighScore ? '🎉 New High Score!' : 'Good job!';
+            document.getElementById('capitalsContent').innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h2 style="font-size: 2rem; margin-bottom: 1rem;">${message}</h2>
+                    <p style="font-size: 1.5rem; margin-bottom: 2rem;">Final Score: ${capitals.score} / ${capitals.questions.length}</p>
+                </div>
+            `;
+            renderGameCards();
+        }
+
+        function resetCapitals() {
+            initCapitals();
+        }
+
+        // MAP GAME
+        const countries = ["France", "Spain", "Italy", "Germany", "United Kingdom", 
+                          "United States", "Canada", "Mexico", "Brazil",
+                          "China", "India", "Japan", "Russia",
+                          "Egypt", "South Africa", "Nigeria", "Australia"];
+
+        let mapGame = { current: 0, score: 0, questions: [] };
+
+        function initMap() {
+            mapGame.current = 0;
+            mapGame.score = 0;
+            mapGame.questions = [...countries].sort(() => Math.random() - 0.5).slice(0, 10);
+            document.getElementById('mapCurrentScore').textContent = '0';
+            
+            // Reset all country paths
+            document.querySelectorAll('.country-path').forEach(path => {
+                path.classList.remove('correct', 'incorrect');
+                path.style.pointerEvents = 'auto';
+            });
+            
+            showMapQuestion();
+        }
+
+        function showMapQuestion() {
+            if (mapGame.current >= mapGame.questions.length) {
+                endMap();
+                return;
+            }
+
+            const country = mapGame.questions[mapGame.current];
+            document.getElementById('targetCountry').textContent = country;
+            
+            // Add click listeners to all country paths
+            document.querySelectorAll('.country-path').forEach(path => {
+                path.onclick = () => checkMapAnswer(path.dataset.country, country);
+            });
+        }
+
+        function checkMapAnswer(selected, correct) {
+            const paths = document.querySelectorAll('.country-path');
+            
+            paths.forEach(path => {
+                if (path.dataset.country === selected) {
+                    if (selected === correct) {
+                        path.classList.add('correct');
+                        mapGame.score++;
+                        document.getElementById('mapCurrentScore').textContent = mapGame.score;
+                    } else {
+                        path.classList.add('incorrect');
+                    }
+                }
+                if (path.dataset.country === correct && selected !== correct) {
+                    path.classList.add('correct');
+                }
+                path.style.pointerEvents = 'none';
+            });
+            
+            setTimeout(() => {
+                paths.forEach(path => {
+                    path.classList.remove('correct', 'incorrect');
+                    path.style.pointerEvents = 'auto';
+                });
+                mapGame.current++;
+                showMapQuestion();
+            }, 2000);
+        }
+
+        function endMap() {
+            const isHighScore = saveHighScore('map', mapGame.score);
+            const message = isHighScore ? '🎉 New High Score!' : 'Good job!';
+            document.getElementById('mapQuestion').innerHTML = `
+                <div style="padding: 2rem;">
+                    <h2 style="font-size: 2rem; margin-bottom: 1rem;">${message}</h2>
+                    <p style="font-size: 1.5rem;">Final Score: ${mapGame.score} / ${mapGame.questions.length}</p>
+                </div>
+            `;
+            renderGameCards();
+        }
+
+        function resetMap() {
+            initMap();
+        }
+
+        // SNAKE GAME
+        let snake = { interval: null, ctx: null };
+        
+        function initSnake() {
+            const canvas = document.getElementById('gameCanvas');
+            snake.ctx = canvas.getContext('2d');
+            snake.gridSize = 25;
+            snake.tileCount = 20;
+            snake.snake = [{x: 10, y: 10}];
+            snake.food = {x: 15, y: 15};
+            snake.dx = 1;
+            snake.dy = 0;
+            snake.score = 0;
+            document.getElementById('snakeCurrentScore').textContent = '0';
+            
+            document.addEventListener('keydown', handleSnakeKey);
+            snake.interval = setInterval(updateSnake, 120);
+        }
+
+        function handleSnakeKey(e) {
+            const key = e.key;
+            if (key === 'ArrowLeft' && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
+            if (key === 'ArrowRight' && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
+            if (key === 'ArrowUp' && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
+            if (key === 'ArrowDown' && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
+        }
+
+        function updateSnake() {
+            const head = {x: snake.snake[0].x + snake.dx, y: snake.snake[0].y + snake.dy};
+            
+            if (head.x < 0 || head.x >= snake.tileCount || head.y < 0 || head.y >= snake.tileCount || 
+                snake.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                stopSnake();
+                saveHighScore('snake', snake.score);
+                renderGameCards();
+                alert(`Game Over! Final Score: ${snake.score}`);
+                return;
+            }
+            
+            snake.snake.unshift(head);
+            
+            if (head.x === snake.food.x && head.y === snake.food.y) {
+                snake.score++;
+                document.getElementById('snakeCurrentScore').textContent = snake.score;
+                snake.food = {
+                    x: Math.floor(Math.random() * snake.tileCount),
+                    y: Math.floor(Math.random() * snake.tileCount)
+                };
+            } else {
+                snake.snake.pop();
+            }
+            
+            drawSnake();
+        }
+
+        function drawSnake() {
+            const ctx = snake.ctx;
+            
+            // Background
+            ctx.fillStyle = '#F9FAFB';
+            ctx.fillRect(0, 0, 500, 500);
+            
+            // Grid lines
+            ctx.strokeStyle = '#E5E7EB';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= snake.tileCount; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * snake.gridSize, 0);
+                ctx.lineTo(i * snake.gridSize, 500);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * snake.gridSize);
+                ctx.lineTo(500, i * snake.gridSize);
+                ctx.stroke();
+            }
+            
+            // Snake with gradient
+            snake.snake.forEach((segment, index) => {
+                const gradient = ctx.createLinearGradient(
+                    segment.x * snake.gridSize, segment.y * snake.gridSize,
+                    (segment.x + 1) * snake.gridSize, (segment.y + 1) * snake.gridSize
+                );
+                gradient.addColorStop(0, '#4F46E5');
+                gradient.addColorStop(1, '#8B5CF6');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(segment.x * snake.gridSize + 1, segment.y * snake.gridSize + 1, 
+                           snake.gridSize - 2, snake.gridSize - 2);
+            });
+            
+            // Food (geography icon)
+            ctx.fillStyle = '#14B8A6';
+            ctx.fillRect(snake.food.x * snake.gridSize + 1, snake.food.y * snake.gridSize + 1, 
+                       snake.gridSize - 2, snake.gridSize - 2);
+            
+            // Draw emoji on food
+            ctx.font = '18px Arial';
+            ctx.fillText('🗺️', snake.food.x * snake.gridSize + 3, snake.food.y * snake.gridSize + 20);
+        }
+
+        function stopSnake() {
+            if (snake.interval) clearInterval(snake.interval);
+            document.removeEventListener('keydown', handleSnakeKey);
+        }
+
+        function resetSnake() {
+            stopSnake();
+            initSnake();
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
