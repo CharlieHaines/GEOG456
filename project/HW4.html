@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <title>Roman Cities</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+        <script src="./data.js"></script>
+
+    </head>
+    <body>
+    <div id="mapid"></div>
+    
+    <style>
+        #mapid{ width: 1425px; height: 750px; }
+    </style>
+
+    <script>  
+    var map = L.map('mapid').setView([41.705728515237524, 15.468750000000002], 4); 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+    var Icon = L.icon({  
+        iconUrl: "./red_dot.png",   
+        iconSize: [7,7],
+        popupAnchor: [0,0]
+        });
+
+    L.geoJSON(data, {
+    pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, {icon: Icon});}}) 
+    .addTo(map); 
+    </script>
+    </body>
+</html>
