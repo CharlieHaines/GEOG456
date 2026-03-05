@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roman City Timeline</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+   integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+   crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+   integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+   crossorigin=""></script>
+
+   <script src="./data.js"></script>
+
+<style>
+     .slidecontainer {
+    width: 100%;
+    }
+
+    .slider {
+    width: 50%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    }
+
+    .slider:hover {
+    opacity: 1;
+    }
+
+    .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+    }
+
+    #mapid{ width: 1425px; height: 750px; }
+</style>
+</head>
+<body>
+     <div class="slidecontainer">
+        <input type="range" min="0" max="0" value="0" class="slider" id="myRange">
+         Date: <span id="demo"></span>
+    </div>
+
+    <div id="mapid"></div>
+
+<script>  
+    var map = L.map('mapid').setView([41.705728515237524, 15.468750000000002], 4); 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+    var redDot = L.icon({  
+        iconUrl: "./red_dot.png",   
+        iconSize: [7,7],
+        popupAnchor: [0,0]
+        });
+
+    var cities = L.geoJSON(data.features[0], {
+    pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, {icon: redDot});}}) 
+    .addTo(map);
+
+    data.features.sort(function(a, b) { return a.properties['Start Date'] - b.properties['Start Date']; });
+
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("demo");
+    slider.max = data.features.length;
+
+    slider.oninput = function() {  
+        output.innerHTML = data.features[(this.value-1)].properties['Start Date']; 
+        map.removeLayer(cities);
+        cities = L.geoJSON(data.features.slice(0,this.value), 
+        {pointToLayer: function (feature, latlng) { 
+        return L.marker(latlng, {icon: redDot});}}); 
+        map.addLayer(cities); 
+        }
+    </script>
+</body>
