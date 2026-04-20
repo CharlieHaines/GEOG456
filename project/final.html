@@ -1,0 +1,779 @@
+ <!-- Hello and welcome to the code for my Roman Empire Map from the beginning to the peak.
+This is the entirely of the code for the map with the data incoorerated into it.
+
+For clarity I have provided explanations of how each part of the code works in the comments.
+This project was done with the help of AI, Claude Code specifcally, so I have some clarrifications
+in the comments of the code that help outline where I was helped by AI. Here is the legend for that:
+
+AI GENERATED: This means that this section was done almost entirly with AI, however in most cases of this
+I made some tweaks to the code
+
+AI ASSISTED: This is a combination of both my work and AI, so this could be a situation where I started
+the code and built out an idea of what I wanted to do, and AI helped me fully perform on what I wanted
+to do. This is in cases where I needed help when things got very coomplicated, or I was looking to 
+optimize processes that would have taken a while to do manually
+
+PARTLY AI - RESEARCH: For these it is situations, where I used AI to research ideas where I could improve
+my code or ideas in which I could get over a problem that I was having. I used this in situations where
+I was confused or there was something wrong with my code
+
+Thank you for visiting my code, hope you enjoyed the map! -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Roman Trade Network</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Data Sources -->
+    <script src="ORBIS_routes.js"></script>
+    <script src="combined_sites.js"></script>
+    <script src="territory_extent.js"></script>
+
+    <!-- CSS: This was primarly done with AI to give my map a clean and proffesoinal looking 
+    design, I did however pick the dark theme basemap because I liked how it made the map
+    look abstract and sleek -->
+    // AI GENERATED
+    <style>
+        body { margin: 0; padding: 0; background: #1a1a2e; font-family: Georgia, serif; }
+        #map { width: 100vw; height: 100vh; }
+
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(20, 15, 10, 0.85);
+            border: 1px solid #c9a96e;
+            border-radius: 8px;
+            padding: 14px 24px;
+            text-align: center;
+            min-width: 420px;
+        }
+        #year-display {
+            color: #f5c842;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        #slider {
+            width: 100%;
+            accent-color: #c9a96e;
+            cursor: pointer;
+        }
+        #slider-labels {
+            display: flex;
+            justify-content: space-between;
+            color: #aaa;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        /* Legend panel */
+        #legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(20, 15, 10, 0.85);
+            border: 1px solid #c9a96e;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #ddd;
+            font-size: 12px;
+        }
+        #legend h4 { margin: 0 0 8px; color: #f5c842; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; margin: 4px 0; gap: 8px; }
+        .legend-dot { border-radius: 50%; display: inline-block; }
+        .legend-line { height: 2px; width: 24px; display: inline-block; }
+
+        /* Stats counter */
+        #stats {
+            position: absolute;
+            top: 230px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(20, 15, 10, 0.85);
+            border: 1px solid #c9a96e;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #ddd;
+            font-size: 12px;
+        }
+        #stats span { color: #f5c842; font-weight: bold; }
+
+        /* Re-theme the built-in Leaflet layer switcher to match the dark UI */
+        .leaflet-control-layers {
+            background: rgba(20, 15, 10, 0.85) !important;
+            border: 1px solid #c9a96e !important;
+            border-radius: 8px !important;
+            color: #ddd !important;
+        }
+        .leaflet-control-layers-toggle {
+            background-color: rgba(20, 15, 10, 0.85) !important;
+        }
+        .leaflet-control-layers-expanded {
+            padding: 10px 14px !important;
+        }
+        .leaflet-control-layers label {
+            color: #ddd !important;
+            font-family: Georgia, serif;
+            font-size: 12px;
+        }
+        .leaflet-control-layers-separator {
+            border-top: 1px solid #c9a96e !important;
+        }
+
+        /* Splash Screen */
+        #splash {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 2000;
+            background: #1a1a2e;
+            overflow-y: auto;
+            opacity: 1;
+            transition: opacity 0.6s ease;
+        }
+        #splash.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #splash-inner {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 60px 40px 80px;
+            color: #ddd;
+        }
+        #splash h1 {
+            color: #f5c842;
+            font-size: 40px;
+            letter-spacing: 4px;
+            text-align: center;
+            margin: 0 0 14px;
+        }
+        #splash h2 {
+            color: #c9a96e;
+            font-size: 15px;
+            font-weight: normal;
+            text-align: center;
+            letter-spacing: 1px;
+            line-height: 1.7;
+            margin: 0 0 36px;
+        }
+        #splash hr {
+            border: none;
+            border-top: 1px solid #3a3a5c;
+            margin: 32px 0;
+        }
+        #splash p {
+            font-size: 14px;
+            line-height: 1.9;
+            color: #bbb;
+            margin: 0 0 16px;
+        }
+        #splash h3 {
+            color: #f5c842;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 0 0 14px;
+            text-align: center;
+        }
+        #splash ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 13px;
+            color: #999;
+            line-height: 2.2;
+            text-align: center;
+        }
+        #splash ul a { color: #c9a96e; }
+        .splash-images {
+            display: flex;
+            gap: 16px;
+            margin: 32px 0;
+        }
+        .splash-img-block {
+            flex: 1;
+            text-align: center;
+        }
+        .splash-img-block img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #3a3a5c;
+            border-radius: 4px;
+            display: block;
+        }
+        .splash-img-block figcaption {
+            font-size: 11px;
+            color: #666;
+            margin-top: 6px;
+            font-style: italic;
+            line-height: 1.5;
+        }
+        #splash-enter-btn {
+            display: block;
+            margin: 40px auto 0;
+            padding: 13px 40px;
+            background: transparent;
+            border: 1px solid #c9a96e;
+            color: #f5c842;
+            font-family: Georgia, serif;
+            font-size: 14px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        #splash-enter-btn:hover { background: rgba(201,169,110,0.12); }
+
+        /* Back to Map button, fixed top-right, only visible when splash is reopened */
+        #splash-back-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            z-index: 2001;
+            padding: 7px 16px;
+            background: transparent;
+            border: 1px solid #c9a96e;
+            color: #c9a96e;
+            font-family: Georgia, serif;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        #splash-back-btn:hover { background: rgba(201,169,110,0.12); }
+        #splash.reopened #splash-back-btn { display: block; }
+
+        /* ABOUT BUTTON (bottom-right of map) */
+        #about-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(20, 15, 10, 0.85);
+            border: 1px solid #c9a96e;
+            border-radius: 8px;
+            padding: 9px 18px;
+            color: #c9a96e;
+            font-family: Georgia, serif;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #about-btn:hover { background: rgba(201,169,110,0.12); }
+    </style>
+</head>
+
+<body>
+
+<!-- This is the code for the splash screen that pops up right before the map is displayed. This is
+ one of my favoirite features because it is one where I get to talk about what I enjoyed doing on this
+ map and how it may be able to help other people! This code essentially starts by creating it with a
+ div, and then adds a back button, so the user can get out of it, and then adds some information about
+ the map and then some images about that can be useful to the people looking for context.
+
+ This splash screen was coded partually by me, and partilly with AI, as I needed some help to determine
+ how to actually produce things like buttons that could take me to different pages. The writing on 
+ the other hand is fully done by me and is not AI generated at all.-->
+//AI ASSISTED
+<div id="splash">
+    <button id="splash-back-btn">✕ Back to Map</button>
+    <div id="splash-inner">
+        <h1>Roman Trade Network From Beginning to Peak</h1>
+        <h2>An Interactive Map of Cities, Roads and Sea Routes<br>across Rome, 500 BCE – 117 CE</h2>
+        <hr>
+        <p>Hello, and welcome to my map of Roman Trade Routes from beginning to peak. This map outlines the evolution of the Roman influence through trade starting at around the time the city was belived to be founded in 753 BCE to its peak in 117 CE. I created this map to give context to a topic that has facisnated me for my entire life, being the impact that history and older civilizations have on the world today. Trade routes are one of the best ways to do this, as a lot of them (espically from the Rome) still exist today!</p>
+        <p>My intrest in this topic started as a kid growing up in Norwich, England, surrounded by Roman Roads. This gave me a lot of context to my history lessons in school, and made me realize that history is not stories of the past, it is actually the story of our present day.</p>
+        <p>The idea of the map came from <b>ORBIS Stanford Geospatial Network Model</b> a map that allows its users to simulate traveling as a Roman, and seeing how long certain routes would take. I took the data from ORBIS, and combined it with data from <b>The Oxford Roman Economy Project</b> provided by Jack Hanson. This data provides start dates for cities, allowing me to  create a temporal interactive map of how cities and the routes that connect them display over time.</p>
+        <p>This project is very important to me as it serves a very real purpose, that is, allowing people to see the real impact that Rome has had on our modern world, and also gaining an understanding for how large the Roman Empire actually was, and how powerful they came to be simply with the power of transportation. Really glad you have made it to the page, hope you enjoy!</p>
+
+        <div class="splash-images">
+            <figure class="splash-img-block">
+                <img src="./Britain_Roman_Road.webp" alt="Roman road in Britain">
+                <figcaption>Roman road, Wirral, Britain </figcaption>
+            </figure>
+            <figure class="splash-img-block">
+                <img src="./road_2.jpg" alt="Map of ancient Roman roads">
+                <figcaption>Map of the ancient Roman road network></figcaption>
+            </figure>
+            <figure class="splash-img-block">
+                <img src="./road_3.jpg" alt="Roman roads network">
+                <figcaption>The beautiful network of ancient Roman roads</figcaption>
+            </figure>
+        </div>
+
+        <button id="splash-enter-btn">ENTER THE MAP</button>
+
+        <hr>
+        <h3>Sources &amp; Credits</h3>
+        <ul>
+            <li><b>Route data:</b> ORBIS: The Stanford Geospatial Network Model of the Roman World — <a href="https://orbis.stanford.edu/" target="_blank">orbis.stanford.edu</a> &nbsp;|&nbsp; <a href="https://github.com/emeeks/orbis_v2/blob/master/base_routes.geojson" target="_blank">Route GeoJSON (GitHub)</a></li>
+            <li><b>City data:</b> The Oxford Roman Economy Project — <a href="https://oxrep.web.ox.ac.uk/cities-database" target="_blank">oxrep.web.ox.ac.uk</a></li>
+            <li><b>Territory boundaries:</b> siriusbontea/roman-empire — <a href="https://github.com/siriusbontea/roman-empire" target="_blank">GitHub</a></li>
+            <li><b>Base tiles:</b> CartoDB — <a href="https://carto.com/" target="_blank">carto.com</a> &nbsp;|&nbsp; <a href="https://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">Leaflet Providers</a></li>
+            <li><b>Ancient base tile:</b> Digital Atlas of the Roman Empire, Lund University — <a href="https://imperium.ahlfeldt.se" target="_blank">imperium.ahlfeldt.se</a></li>
+            <li><b>Mapping library:</b> Leaflet.js — <a href="https://leafletjs.com" target="_blank">leafletjs.com</a></li>
+            <li><b>Images:</b> <a href="https://wirralarchaeology.org/pages/project/wirrals-roman-roads/" target="_blank">Wirral Archaeology</a> &nbsp;|&nbsp; <a href="https://www.cnn.com/2025/11/06/science/map-ancient-roman-empire-roads" target="_blank">CNN Science</a> &nbsp;|&nbsp; <a href="https://www.atlasobscura.com/articles/the-beautiful-network-of-ancient-roman-roads" target="_blank">Atlas Obscura</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- This section of the code is starting to build the parts of the map that the user can see when they
+ intereact with the map, these features provide more information while changing as the user moves through
+ the slider and layers, it is made up of three components:
+
+ Map: This is creating the map ID in HTML to display the map.
+
+ Slider Controls: This is the design for the slider, creating it, and giving it a location on the map, being
+ the bottom middle of the map. It has the start dates and end dates of the slider,being represented by the 
+ year-display ID as well as informatoin under the slider to tell the user where they are while sliding,
+ labeled as slider-labels .
+
+ Legend: This is the template for the legend, this code tells the legend where to go, as well as displaying the
+ same dots and lines that would be displayed on the actual map. I used AI to help coordinate the colors from CSS
+ to this div.
+
+ Stats: This is the display in the top right corner, and it tells the user the amount of cities and routes that
+ have been loaded in as they make their way through the slider.
+
+ About / Source Button: This is a button that takes you to the page for sources that you started on
+ or the splash page.
+
+ This part of the code was done by myslef, and by AI, as I was working with the AI to help generate connectoins
+ to the actual CSS so that the stlye could be connected. I also did some resaerch to discover elements like <span>
+ and formating like &nbsp;|&nbsp; to make spacing less akward.-->
+ //PARTLY AI GENERATED - RESEARCH
+<!-- Map ID -->
+<div id="map"></div>
+
+<!-- Slider Controls -->
+<div id="controls">
+    <div id="year-display">500 BCE</div>
+    <input type="range" id="slider" min="-500" max="117" value="-500" step="1">
+    <div id="slider-labels">
+        <span>500 BCE</span><span>250 BCE</span><span>1 CE</span><span>60 CE</span><span>117 CE</span>
+    </div>
+</div>
+
+<!-- Legend -->
+<div id="legend">
+    <h4>Roman Trade Network</h4>
+    <div class="legend-item"><span class="legend-dot" id="leg-city-1" style="width:16px;height:16px;background:#f5c842;"></span> Major City (rank 100)</div>
+    <div class="legend-item"><span class="legend-dot" id="leg-city-2" style="width:12px;height:12px;background:#f5c842;"></span> Regional City (rank 90)</div>
+    <div class="legend-item"><span class="legend-dot" id="leg-city-3" style="width:8px;height:8px;background:#f5c842;"></span> City (rank 80)</div>
+    <div class="legend-item"><span class="legend-dot" id="leg-city-4" style="width:6px;height:6px;background:#f5c842;"></span> Town (rank 70)</div>
+    <div class="legend-item"><span class="legend-dot" id="leg-city-5" style="width:4px;height:4px;background:#f5c842;"></span> Minor (rank ≤60)</div>
+    <div class="legend-item"><span class="legend-line" id="leg-road" style="background:#c9a96e;"></span> Road</div>
+    <div class="legend-item"><span class="legend-line" id="leg-sea" style="background:#4a90d9;"></span> Sea Route</div>
+    <div class="legend-item"><span class="legend-line" id="leg-river" style="background:#5ecfb0;"></span> River Route</div>
+</div>
+
+<!-- Routes and City Stats -->
+<div id="stats">
+    Cities: <span id="stat-cities">0</span> &nbsp;|&nbsp; Routes: <span id="stat-routes">0</span>
+</div>
+
+<!-- About / Sources button -->
+<button id="about-btn">About / Sources</button>
+
+<script>
+    /* This is the start of the construction of the map, I made sure to give it a good location
+    to start at and good zoom that would make the expereince the best for the user. */
+    var map = L.map('map', {
+        center: [40, 20],
+        zoom: 5,
+        minZoom: 4,
+        maxZoom: 10,
+        zoomControl: false
+    });
+    /* I removed the zoomcontrols from the map because it was underneath the layers display in the top left corner
+    I ended up replacing it with line 183, where I positioned it in the bottom left so that user could still use it */
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+
+    /* This is what make up my three different layers:
+    
+    darkTile: Is the dark background
+    voyagerTile: Is the modern day modern routes basemap
+    dareTile: Is the Roman Empire Basemap
+
+    darkTile and voyagerTile are both provided by CartoDB, and were accesible through the Github website of:
+    https://leaflet-extras.github.io/leaflet-providers/preview/
+
+    dareTile was provided by the university of Lund in Sweden on this link:
+    https://imperium.ahlfeldt.se/ 
+    */
+    var darkTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CartoDB',
+        subdomains: 'abcd'
+    });
+    var voyagerTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CartoDB &copy; OpenStreetMap contributors',
+        subdomains: 'abcd'
+    });
+
+    var dareTile = L.tileLayer('https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://dare.ht.lu.se/">DARE, Lund University</a>',
+        maxZoom: 10
+    });
+    // This sets the darkTile basemap as default
+    darkTile.addTo(map);
+
+    /* This is the overlay order, there were some issues when the map was being displayed 
+    that the roads were being displayed over the cities, so I asked AI to tell me how to solve
+    this problem, it gave me this code here which uses a zIndex to order the layers with numbers
+    so that the layers are displayed in the correct order */
+    //AI ASSISTED
+    map.createPane('territoryPane');
+    map.getPane('territoryPane').style.zIndex = 420;
+    map.getPane('territoryPane').style.pointerEvents = 'none';
+
+    map.createPane('citiesPane');
+    map.getPane('citiesPane').style.zIndex = 450;
+
+    /* This code below is creating the layers which will later be used in the updateMap()
+    funciton */
+    //AI ASSISTED
+    var routeGroup = L.layerGroup().addTo(map);
+    var cityGroup = L.layerGroup().addTo(map);
+    var territoryGroup = L.layerGroup().addTo(map);
+
+    /* This is creating the actual layer control pannel that is being displayed in the top left
+    corner of the map display, I used AI for help on this to make it match the same stlye with
+    the CSS*/
+    //AI ASSISTED
+    L.control.layers(
+        { 'Dark': darkTile, 'Modern Roads': voyagerTile, 'Roman Empire': dareTile },
+        { 'Roman Routes': routeGroup, 'Cities': cityGroup, 'Territory': territoryGroup },
+        { position: 'topleft', collapsed: false }
+    ).addTo(map);
+
+    /* This is a function that I created to determine what the size each city should be on the map.
+    I wanted to display the more important cities based on the rank that was provided in the data*/
+    function getRankRadius(rank) {
+        if (rank >= 100) return 14;
+        if (rank >= 90)  return 8;
+        if (rank >= 80)  return 4;
+        if (rank >= 70)  return 2.5;
+        return 1.5;
+    }
+
+    /* This is a function that was written almost fully by AI, as I wanted to make it so different
+    colors routes displayed on different maps. I did not know how to do this so I asked AI for help,
+    and it gave me this.
+
+    This function essentially asks the question of which map the user is on, and then depending on which
+    routes are being displayed, it displays the correct color for the map, so that the user can 
+    acutally see the routes.
+
+    This was a problem that I had ealier and it turned out to be a pretty simple fix
+    */
+   //AI GENERATED
+    function getRouteStyle(type) {
+        var isDARE = currentBaseLayer === 'Roman Empire';
+        if (type === 'coastal' || type === 'overseas' || type === 'ferry') {
+            return { color: isDARE ? '#ffffff' : '#4a90d9', weight: 2 };
+        }
+        if (type === 'upstream' || type === 'downstream') {
+            return { color: '#5ecfb0', weight: 2 };
+        }
+        return { color: isDARE ? '#7b4f2e' : currentBaseLayer === 'Modern Roads' ? '#000000' : '#c9a96e', weight: 2.5 };
+    }
+
+    /* This was suggested by AI, and it creates a lookup table that the code does not have to refer
+    back to the data all the time */
+    //PARTLY AI GENERATED - RESEARCH
+    var cityData = {};
+    combined_sites.features.forEach(function(f) {
+        cityData[f.properties.id] = f.properties;
+    });
+
+    /* This is just creating some variables for the upcoming functions to make creating teh 
+    functions easier*/
+    //AI ASSISTED
+    var currentYear = -500;
+    var activeCityIds = new Set();
+    var currentBaseLayer = 'Dark';
+
+    var territoryFeatures = [];
+    var territoryLayers = new Map();
+
+    /* This function is very important as it turns the strings of numbers in the dataset into
+    numbers so that the slider can operate*/
+    //AI GENERATED
+    function parseYearString(s) {
+        if (!s) return null;
+        var bc = s.match(/(\d+)\s*B\.C\./);
+        if (bc) return -parseInt(bc[1]);
+        var ad = s.match(/A\.D\.\s*(\d+)/);
+        if (ad) return parseInt(ad[1]);
+        return null;
+    }
+
+    /* This part of the code is AI written and works with the territory data to clean it and 
+    then chronoligically sort it into the order that is adjacent with the slider*/
+    //AI ASSISTED
+    territoryFeatures = territoryExtent.features
+        .map(function(f) { return { ...f, _year: parseYearString(f.properties.year_string) }; })
+        .filter(function(f) { return f._year !== null; })
+        .sort(function(a, b) { return a._year - b._year; });
+
+    /*This function is entriely for the territory part of the map, in which the territory of the Roman
+    Empire is shown over time, and it is broken down into four main parts:
+    
+    Color: The first variable of fillColor, fills the territory color with the red that is seen on 
+    the map
+
+    For Loop: This is what actually produces the territory on the map, as it loops the territories
+    on the map as the slider goes by, it does however have an addiational if statement that basically
+    is saying that if this territory has already been printed, do not print it again. This allows for
+    the map to not reapeat territories if someone were to go back and forth. It also allows for the
+    territories to stack, so that they are able to come together as one big territories as they connect
+
+    Backwords Delete: This part deletes the territories as the user moves backwards so the user
+    can go back and forth as they use the slider
+    
+    Stlying Correcter: This is a part of the function that makes sure that the color and style of the
+    actual polygons and territories stays consisent, and was implemented after I was having some trouble
+    with some glithes where the terriroy was disapearing completley when you moved the slider backwards
+
+    This function is written again, both my myself and by AI, with AI making sure that the stlying is
+    being correclty coordinated, and since this code is a little bit complicated for me, teaching me the
+    steps of how to make sure that this code runs as smoothly as possible. For example, when I was trying
+    to research how to produce this, I did not know about the delete method, and I was also struggling
+    on how to connect it to my already exisiting code, since this was one of the last features that I 
+    added */
+    //AI ASSISTED
+    function updateTerritory(year) {
+        //Color
+        var fillColor = '#8B0000';
+
+        //For Loop
+        for (var i = 0; i < territoryFeatures.length; i++) {
+            var f = territoryFeatures[i];
+            if (f._year <= year && !territoryLayers.has(f._year)) {
+                var layer = L.geoJSON(f, {
+                    pane: 'territoryPane',
+                    style: { color: fillColor, weight: 1, fillColor: fillColor, fillOpacity: 0.15, opacity: 0.6 }
+                }).addTo(territoryGroup);
+                territoryLayers.set(f._year, layer);
+            }
+        }
+
+        //Backwords Delete
+        var toDelete = [];
+        territoryLayers.forEach(function(layer, yr) {
+            if (yr > year) {
+                territoryGroup.removeLayer(layer);
+                toDelete.push(yr);
+            }
+        });
+        toDelete.forEach(function(yr) { territoryLayers.delete(yr); });
+
+        //Stlying Coorecter
+        territoryLayers.forEach(function(layer) {
+            layer.setStyle({ color: fillColor, fillColor: fillColor });
+        });
+    }
+
+    /* This is code that I asked AI to produce as it was something that was suggested to me.
+    This code essentially makes sure that the legend is corresponding with the colors and shapes
+    on the map. This is because when the user changes a color, the color of the roads also changes
+    and in that case so does the legend. So this function essentially makes sure that the legend stays
+    up to date as the colors of the routes and cities change with the layers*/
+    //AI ASSISTED
+    function updateLegend() {
+        var isDARE = currentBaseLayer === 'Roman Empire';
+        var cityColor = isDARE ? '#9b59b6' : '#f5c842';
+        var roadColor = isDARE ? '#7b4f2e' : currentBaseLayer === 'Modern Roads' ? '#000000' : '#c9a96e';
+        var seaColor = isDARE ? '#ffffff'  : '#4a90d9';
+
+        ['leg-city-1','leg-city-2','leg-city-3','leg-city-4','leg-city-5'].forEach(function(id) {
+            document.getElementById(id).style.background = cityColor;
+        });
+        document.getElementById('leg-road').style.background  = roadColor;
+        document.getElementById('leg-sea').style.background   = seaColor;
+        document.getElementById('leg-river').style.background = '#5ecfb0';
+    }
+
+    /*This is what actually changes the legend and the map when the baselayer changes, putting
+    the funciton into practice */
+    //AI ASSISTED
+    map.on('baselayerchange', function(e) {
+        currentBaseLayer = e.name;
+        updateLegend();
+        updateMap(currentYear);
+    });
+
+    /* This is a function that creates the colors for the cities based on the current basemap,
+    and it is very simular to the getRouteStlye() function that we used above*/
+    //AI ASSISTED
+    function getMarkerColors() {
+        if (currentBaseLayer === 'Roman Empire') {
+            return { fill: '#9b59b6', outline: '#fff' };
+        }
+        return { fill: '#f5c842', outline: '#fff' };
+    }
+
+    /* This is a very simple and basic funciton that takes those numbers of years, so for example
+    -200 or 110, and turns them into BCE and CE, so the neegative numbers are BCE and the positive
+    numbers are CE. This is somethig that was really important when it came to clarity. I also made
+    the decision to to Common Era, because that is what is most commonly used today*/
+    function formatYear(y) {
+        return y < 0 ? Math.abs(y) + ' BCE' : y + ' CE';
+    }
+
+    /* These are Maritime waypoints that were generated by an AI, based on when in the data the sea
+    routes touch have two city endpoints, this had to be done because the water routes were not showing
+    up on the regular functionn for some resason, so I jsut had AI do it manually and give me this array. */
+    //AI GENERATED
+    var waypointStartDates = {150011:-400, 150012:-38, 150017:-322, 150024:-300, 150026:-305, 150028:-323, 150035:106, 150037:-35, 150040:-400, 150041:-27, 150053:-44, 150055:-27, 150057:-27, 150077:-189, 150078:-189, 150079:101, 150083:-15, 150085:50, 150088:-49, 150091:-27, 150092:-323, 150096:-27, 150099:-44, 150105:15, 150115:-27, 150119:-323, 150121:-27, 150124:-27, 150125:14, 150130:-323, 150131:-152, 150133:200, 150149:107, 150150:-800, 150154:101, 150155:-323, 150158:138, 150160:100, 150164:-323, 150170:-323, 150174:-41, 150192:-323, 150194:-323, 150196:-300, 150197:-323, 150199:-45, 150200:-700, 150210:-27, 150228:191, 150232:90, 150234:-27, 150238:1, 150242:-27, 150244:-323, 150251:-89, 150253:71, 150254:-323, 150257:1, 150259:133, 150267:-300, 150275:-323, 150276:46, 150277:69, 150279:-400, 150282:71, 150283:-138, 150284:-323, 150286:-350, 150288:-323, 150297:-323, 150303:100, 150307:-500, 150309:-218, 150310:-27, 150314:41, 150317:-350, 150321:-323, 150323:-400, 150325:-49, 150327:-700, 150338:-323, 150356:100, 150359:1, 150361:-27, 150364:-400, 150370:-15, 150373:-323, 150375:107, 150378:-400, 150382:-323, 150395:-50, 150398:-27, 150403:-15, 150406:-49, 150408:14, 150414:-89, 150416:-49, 150418:-58, 150419:60, 150420:100, 150423:41, 150428:-301, 150429:-43, 150432:-323, 150435:-27, 150454:-301, 150459:-27, 150461:-27, 150462:-27, 150468:-189, 150471:-27, 150504:-400, 150618:-700, 150660:-323, 150661:-323, 150674:-323, 150720:-500, 150726:-49, 150743:-15, 150745:-49, 150754:-189, 150759:90, 150764:-218, 250006:-323, 250011:-400, 250014:-400, 250017:-322, 250019:-310, 250020:-50, 250022:-387, 250034:-181, 250036:-247, 250040:-400, 250042:-268, 250046:-323, 250049:-400, 250050:-900, 250051:-400, 250065:-27, 250066:-600, 250073:-323, 250084:-27, 250086:-400, 250088:-49, 250094:-22, 250101:49, 250107:-49, 250108:-225, 250110:-400, 250112:-631, 250117:-685, 250121:-27, 250129:-650, 250134:-400, 250136:-750, 250141:-631, 250143:-800, 250145:-50, 250147:100, 250156:100, 250159:-627, 250162:-800, 250167:-520, 250169:-292, 250171:-27, 250175:-400, 250176:-43, 250179:-400, 250181:-58, 250183:-205, 250185:-27, 250186:96, 250188:-150, 250198:-100, 250199:-45, 250200:-700, 250201:-35, 250206:-323, 250207:100, 250214:-654, 250216:-300, 250223:-654, 250225:-301, 250230:-30, 250233:-100, 250235:60, 250238:1, 250240:100, 250241:-177, 250250:-600, 250255:-400, 250256:-31, 250264:-45, 250266:-49, 250268:-500, 250272:-264, 250273:-323, 250280:-600, 250281:-27, 250283:-138, 250286:-350, 250291:-322, 250297:-323, 250301:-602, 250303:100, 250307:-500, 250311:-178, 250312:-600, 250319:-30, 250320:-601, 250322:-524, 250323:-400, 250326:-730, 250328:-27, 250329:-50, 250330:49, 250331:-200, 250332:-210, 250333:1, 250334:-33, 250335:-400, 250336:-78, 250349:-44, 250353:-700, 250354:100, 250357:-400, 250358:-400, 250363:-334, 250374:-50, 250377:-706, 250378:-400, 250379:-218, 250383:-43, 250389:-316, 250396:-100, 250399:-600, 250401:98, 250405:-800, 250411:100, 250412:100, 250417:-550, 250430:-27, 250438:-690, 250439:-500, 250440:-500, 250446:-400, 250447:-262, 250448:-500, 250449:-50, 250450:-50, 250451:-600, 250452:-400, 250453:-750, 250454:-301, 250455:-733, 250456:-733, 250457:-600, 250458:-750, 250462:-27, 250464:-50, 250467:-600, 250469:-44, 250471:-27, 250474:100, 250476:-50, 250482:-27, 250483:-44, 250485:-50, 250486:-400, 250487:-600, 250489:-564, 250491:-50, 250492:-200, 250493:-50, 250495:-310, 250498:-50, 250499:-310, 250501:-397, 250504:-400, 250505:-397, 250507:-323, 250509:-42, 250512:-600, 250513:-599, 250515:-30, 250516:-730, 250518:-44, 250520:-27, 250521:-701, 250523:-701, 250524:-708, 250527:-600, 250528:-323, 250529:-600, 250530:-600, 250531:-247, 250533:-588, 250534:-588, 250535:-588, 250537:-734, 250538:-247, 250539:-700, 250540:-800, 250541:-800, 250542:-800, 250544:-600, 250545:-631, 250546:-600, 250547:-600, 250548:-600, 250549:-44, 250550:-44, 250551:-631, 250552:-600, 250553:-631, 250554:-600, 250555:-800, 250556:-600, 250557:-600, 250558:-600, 250559:-437, 250562:-366, 250564:-700, 250567:-631, 250568:-631, 250569:-600, 250572:-700, 250573:-700, 250577:-500, 250582:-500, 250586:-700, 250588:-700, 250590:-700, 250592:-700, 250593:-500, 250594:-700, 250597:-700, 250598:-700, 250599:-600, 250602:-323, 250603:-360, 250604:-366, 250606:-700, 250608:-600, 250609:-700, 250610:-323, 250611:-400, 250612:-700, 250613:-408, 250614:-600, 250617:-685, 250618:-700, 250619:-600, 250620:-700, 250621:-500, 250622:-400, 250623:-500, 250624:-323, 250625:-600, 250626:-400, 250627:-500, 250628:-600, 250630:-750, 250631:-323, 250632:-756, 250634:-750, 250636:-323, 250637:-323, 250639:-756, 250641:-500, 250642:-301, 250643:-323, 250644:-300, 250646:-500, 250647:-750, 250648:-323, 250649:-305, 250650:-323, 250651:-690, 250652:-690, 250654:-58, 250658:-323, 250713:-200, 250714:-700, 250715:-582, 250716:-564, 250717:-290, 250718:-437, 250725:-650, 250741:-800, 250755:-323, 250756:-123, 250758:-500, 250759:90, 250761:-500, 250762:-400, 250775:-700, 250776:-500, 250777:-600, 250778:-700, 250779:-366, 250780:-700, 250781:-366, 250782:-700, 250783:-700, 250784:-700, 250785:-600, 250786:-600, 250787:-600, 250788:-500, 250790:-900, 250791:-479, 250792:-700, 250793:-700, 250795:-700, 250796:-600, 250797:-600, 250798:-700, 250799:-323, 250800:-700, 250801:-600, 350017:-322, 350034:-181, 350046:-323, 350073:-323, 350094:-22, 350107:-49, 350108:-225, 350121:-27, 350129:-650, 350147:100, 350156:100, 350179:-400, 350185:-27, 350200:-700, 350206:-323, 350230:-30, 350235:60, 350238:1, 350250:-600, 350264:-45, 350283:-138, 350286:-350, 350291:-322, 350297:-323, 350303:100, 350333:1, 350354:100, 350379:-218, 350396:-100, 350412:100, 350440:-500, 350446:-400, 350448:-500, 350449:-50, 350451:-600, 350452:-400, 350456:-733, 350462:-27, 350464:-50, 350474:100, 350482:-27, 350483:-44, 350485:-50, 350486:-400, 350487:-600, 350493:-50, 350499:-310, 350501:-397, 350505:-397, 350512:-600, 350516:-730, 350529:-600, 350533:-588, 350538:-247, 350540:-800, 350541:-800, 350545:-631, 350547:-600, 350551:-631, 350554:-600, 350556:-600, 350558:-600, 350568:-631, 350577:-500, 350602:-323, 350613:-408, 350617:-685, 350626:-400, 350627:-500, 350639:-756, 350641:-500, 350646:-500, 350651:-690, 350713:-200, 350716:-564, 350756:-123, 350758:-500, 450117:-685, 450129:-650, 450179:-400, 450185:-27, 450214:-654, 450223:-654, 450326:-730, 450330:49, 450396:-100, 450516:-730};
+
+    /* This is the most important and complicated function, that essentially creates the slider
+    and the effect of the mpa all together, it can be divided into four main caterogies:
+    
+    Reseting the Map: This is the start of the function that restarts everything back to zero everytime
+    the user uses the slider, it does it very quickly however, so the user does not notice, it essentially
+    does this because it is resettig the count for the amount of active routes that correspond to that
+    year and the active routes that correspond to that year
+
+    Active Information: This is the part of the code that works to find which cities and routes are
+    active based on what is where the slider is in the year, so for example, if the slider was on 
+    the year 300 BCE, then all of the active cities and routes would be ones that were established 
+    before that date. This is essentially just building a list of cities that will be put into a list
+    for later
+
+    Drawing Cities: This part of the code actually puts the cities down by taking that active list and
+    then corresponding it to the map, so that cities go onto the map based on their coordiantes and
+    other information. This also adds other things like color and the size of the marker from some of
+    the functions that were provided above
+
+    Drawing Routes: This was something that I really struggled to figure out how I wanted to do it.
+    The actual routes themselves do not have dates on them, so this part of the function actually checks
+    that both end points cities of the route are avalible, and then if they both of those endpoints are
+    avalible, it produce and show the route. The maritime routes are also simply just drawn from the
+    array that was created for them in estiamtes.
+
+    Stats Update: This last part just relates to the stats pannel that we created at the beginnning of the
+    code and updates that as the routes and cities build up */
+    //AI ASSISTED
+    function updateMap(year) {
+        //Reseting the Map
+        cityGroup.clearLayers();
+        routeGroup.clearLayers();
+        activeCityIds.clear();
+
+        var cityCount  = 0;
+        var routeCount = 0;
+
+        //Actie Information
+        combined_sites.features.forEach(function(f) {
+            var p = f.properties;
+            if (p.start_date === null) return;
+            if (p.start_date > year) return;
+            if (p.end_date && p.end_date !== 'NULL' && parseInt(p.end_date) < year) return;
+            activeCityIds.add(p.id);
+        });
+
+        //Drawing Cities
+        combined_sites.features.forEach(function(f) {
+            var p = f.properties;
+            if (!activeCityIds.has(p.id)) return;
+
+            /* GeoJSON is [lng, lat]; Leaflet needs [lat, lng] */
+            var latlng = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+            var colors = getMarkerColors();
+
+            var marker = L.circleMarker(latlng, {
+                pane:        'citiesPane',
+                radius:      getRankRadius(p.rank),
+                fillColor:   colors.fill,
+                color:       colors.outline,
+                weight:      0.5,
+                opacity:     1,
+                fillOpacity: 0.85
+            });
+            marker.bindPopup(`
+                <b>${p.label}</b><br>
+                Province: ${p.province}<br>
+                Modern: ${p.modern}<br>
+                Founded: ${formatYear(p.start_date)}
+            `);
+            cityGroup.addLayer(marker);
+            cityCount++;
+        });
+
+        //Drawing Routes
+        var waterTypes = new Set(['coastal', 'overseas', 'ferry', 'upstream', 'downstream']);
+        ORB_routes.features.forEach(function(f) {
+            var p = f.properties;
+
+            if (waterTypes.has(p.t)) {
+                var sStart = waypointStartDates[p.sid];
+                var tStart = waypointStartDates[p.tid];
+                if (sStart === undefined || tStart === undefined) return;
+                if (sStart > year || tStart > year) return;
+            } else {
+                if (!activeCityIds.has(p.sid) || !activeCityIds.has(p.tid)) return;
+            }
+
+            /* GeoJSON is [lng, lat]; Leaflet needs [lat, lng] */
+            var coords = f.geometry.coordinates.map(function(c) { return [c[1], c[0]]; });
+            var line   = L.polyline(coords, { ...getRouteStyle(p.t), opacity: 1 });
+            routeGroup.addLayer(line);
+            routeCount++;
+        });
+
+        //Stats Update
+        document.getElementById('stat-cities').textContent = cityCount;
+        document.getElementById('stat-routes').textContent = routeCount;
+    }
+
+    /* This is what helps create the slider, so it is what helps the map and slider move in 
+    real time as the user uses the slider*/
+    //AI ASSISTED
+    var slider = document.getElementById('slider');
+    var yearDisplay = document.getElementById('year-display');
+
+    /* Updates everything as the slider moves on and is common in most slider maps, known for 
+    actually being the functioning part of the slider*/
+    slider.addEventListener('input', function() {
+        currentYear = parseInt(this.value);
+        yearDisplay.textContent = formatYear(currentYear);
+        updateMap(currentYear);
+        updateTerritory(currentYear);
+    });
+
+    //This is what helps start the map and sets everything where it needs to be when the user logs in
+    //AI ASSISTED
+    updateLegend();
+    updateMap(-500);
+    updateTerritory(-500);
+
+    /* These are the controls for the splash screen that help work the page and the buttons*/
+    //AI ASSISTED
+    var splash = document.getElementById('splash');
+    document.getElementById('splash-enter-btn').addEventListener('click', function() {
+        splash.classList.add('hidden');
+    });
+    document.getElementById('splash-back-btn').addEventListener('click', function() {
+        splash.classList.add('hidden');
+    });
+    document.getElementById('about-btn').addEventListener('click', function() {
+        splash.classList.add('reopened');
+        splash.classList.remove('hidden');
+        splash.scrollTop = 0;
+    });
+</script>
+</body>
+</html>
