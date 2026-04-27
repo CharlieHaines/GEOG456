@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Change</title>
+</head>
+<style>
+    body{
+        background-color: black;
+        font-size:20px;
+        height:2000px;
+    
+        
+    }
+    div#image_container{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 80px;
+        
+    }
+    img{
+        width: 100%;
+        position: absolute;
+    }
+
+    #img2017 {
+        z-index: 2;
+        opacity: 0;
+    }
+
+    #img2009{
+        z-index: 1;
+        opacity: 1;
+    }
+    #img2023{
+        z-index: 3;
+        opacity: 0;
+    }
+
+#myText{
+    color: aliceblue;
+    top: 80px;
+    display: grid;
+    width: 350px;
+    height: 3000px;
+    grid-template-rows: 33% 33% 33%;
+    background-color: rgb(35, 95, 95, .5);
+    position: absolute;
+    right: 0%;
+    margin-left: 50%;
+}
+#yAfter{
+
+    background-color: rgb(35, 95, 95, .5);
+    /* color: brown; */
+}
+#myP{
+    top:0;
+    position: fixed;
+    color: aliceblue;
+}
+h3{
+    color: white;
+    position: fixed;
+    font-size: 20px;
+    top: 30px;
+}
+</style>
+<body>
+    <h3 id="h3scroll">The Battery, 2009, 2017, 2023</h3><br>
+
+    <p id="myP" style="position:fixed">
+        Scroll to see changes</p> <br>
+    
+    <div id="image_container">
+        <img id="img2023"  src="../HW6/2023E.png" alt="">
+        <img id="img2017" src="../HW6/2017A.png" alt="">
+        <img id="img2009" src="../HW6/Histogram_Matched_2009E.png" alt="">
+
+    </div>
+    <div id="myText">
+    <div id="y2009">
+        <h1>2009</h1>
+        <p>This is a three year transition of The Battery in Atlanta GA, and what is now the home of the Atlanta Braves. I grew up around this area as a kid and watched its transformation myself as I drove past it each day on the way to school, so I thought it would be cool to show it with arieal images. In 2017, the Altlanta Braves moved to The Battery and Truist Park after leaving Turner Feild. The new stadium was supposed to be an area for more than baseball as it was turning into a large business, resturant, and resideitail hub. I decided to outline the three years of 2009, to see what the area looked like before the city planned to develop it, what it looked like on the first year, and then what it looks like around modern day. Overall, it turned out very well, showing a clear change in what the area looked like from 2009 to 2017, then showing some of the changes that have occured since that first year. This reflects my own experience of living near this area, as well as going to it in 2017, and going to it in 2023. It is clear that a lot has changed, but from a non-areial persepctive, it is hard to tell what has actually changed. This project was a great way to see how a large city like Atlanta develops certain areas of the city, and how this is leading to larger expansions of the city.</p>
+    </div>
+    <div id="y2017">
+        <h1>2017</h1>
+    </div>
+    <div id="y2023">
+        <h1>2023</h1>
+    </div>
+    </div>
+<script>
+
+    var maxY = document.documentElement.scrollHeight - document.documentElement.clientHeight
+    // The previous is a good way of calculating the maximum vertical scrolling. 
+
+    window.onscroll = function() {myFunction()}; // when you scroll the myFunction will be called. 
+    
+    // myFunction changes the opacity of the image based on the scroll
+    function myFunction() {
+        var opacity = window.scrollY/maxY
+        document.getElementById("img2017").style.opacity = opacity * 2
+        document.getElementById("img2023").style.opacity = (opacity - 0.5) * 2
+        document.getElementById("h3scroll").innerText = "Scroll Y / Max Y = " + opacity.toFixed(2)
+    }
+    </script>
+</body>
+</html>

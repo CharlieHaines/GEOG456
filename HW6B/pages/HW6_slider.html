@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Change</title>
+</head>
+
+<style>
+    body{
+        background-color: black;
+        font-size:20px;
+        color:white
+    }
+    div#image_container{
+        position: relative;
+        
+    }
+    img{
+        height:500px;
+        position: absolute;
+    }
+
+    p {
+        margin-top: 520px;
+    }
+
+    #img2017{
+        z-index: 2;
+        opacity: 0;
+    }
+
+    #img2009{
+        z-index: 1;
+        opacity: 1;
+    }
+    #img2023{
+        z-index: 3;
+        opacity: 0;
+    }
+
+datalist {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 400px;
+}
+
+option {
+  padding: 0;
+}
+
+input {
+  width: 400px;
+  margin: 0;
+}
+
+</style>
+<body>
+
+    <label for="year">The Battery</label><br />
+<input type="range" id="year" name="year" list="tickmarks" value="0" oninput="myFunction(this.value)"/>
+<datalist id="tickmarks">
+  <option value="0" label="2009"></option>
+  <option value="100" label="2023"></option>
+</datalist>
+
+<div id="image_container">
+        <img id="img2023"  src="../HW6/2023E.png" alt="">
+        <img id="img2017" src="../HW6/2017A.png" alt="">
+        <img id="img2009" src="../HW6/Histogram_Matched_2009E.png" alt="">
+
+    </div>
+
+<script>
+    function myFunction(e) {
+        console.log(e)
+        document.getElementById("img2017").style.opacity = e/50;
+        document.getElementById("img2023").style.opacity = (e-50)/50;
+    }
+    </script>
+<p>This is a three year transition of The Battery in Atlanta GA, and what is now the home of the Atlanta Braves. I grew up around this area as a kid and watched its transformation myself as I drove past it each day on the way to school, so I thought it would be cool to show it with arieal images. In 2017, the Altlanta Braves moved to The Battery and Truist Park after leaving Turner Feild. The new stadium was supposed to be an area for more than baseball as it was turning into a large business, resturant, and resideitail hub. I decided to outline the three years of 2009, to see what the area looked like before the city planned to develop it, what it looked like on the first year, and then what it looks like around modern day. Overall, it turned out very well, showing a clear change in what the area looked like from 2009 to 2017, then showing some of the changes that have occured since that first year. This reflects my own experience of living near this area, as well as going to it in 2017, and going to it in 2023. It is clear that a lot has changed, but from a non-areial persepctive, it is hard to tell what has actually changed. This project was a great way to see how a large city like Atlanta develops certain areas of the city, and how this is leading to larger expansions of the city.</p>
+
+</body>
+</html>
